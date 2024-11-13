@@ -15,21 +15,36 @@ class Sheet extends JPanel {
     
     public int cellWidth = 64; public int cellHeight = 20;
     
-    private int selectedCellx; private int selectedCelly;
+    // Do not assign to these directly, use selectCell()
+    public int selectedCellx; public int selectedCelly;
     
     // public so SheetFrame can scroll it
     public int scrollx; public int scrolly;
     
-    private int maxCellsx; private int maxCellsy;
+    public int maxCellsx; public int maxCellsy;
     
     public final int bufferLimit = 8000; // in bytes
     
     public Sheet(String filename, int maxCellsx, int maxCellsy) {
         this.filename = filename;
         this.maxCellsx = maxCellsx; this.maxCellsy = maxCellsy;
-        selectCell(0, 0);
         scrollx = 0; scrolly = 0;
-        //setBackground(Color.WHITE);
+        selectCell(0, 0);
+        
+        addMouseListener(new MouseListener() {
+            public void mouseClicked(MouseEvent e) {
+                int cellx = (int) ((double) e.getX() / cellWidth);
+                int celly = (int) ((double) e.getY() / cellHeight);
+                if (cellx + scrollx <= maxCellsx && celly + scrolly <= maxCellsy) {
+                    selectCell(cellx + scrollx, celly + scrolly);
+                }
+            }
+            
+            public void mousePressed(MouseEvent e) {}
+            public void mouseReleased(MouseEvent e) {}
+            public void mouseEntered(MouseEvent e) {}
+            public void mouseExited(MouseEvent e) {}
+        });
     }
     
     public String getCell(int x, int y) {
@@ -43,6 +58,7 @@ class Sheet extends JPanel {
     // is overriden in SheetFrame to support input field
     public void selectCell(int x, int y) {
         selectedCellx = x; selectedCelly = y;
+        repaint();
     }
     
     @Override

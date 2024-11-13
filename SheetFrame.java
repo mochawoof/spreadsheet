@@ -5,8 +5,25 @@ import java.awt.event.*;
 
 class SheetFrame extends JFrame {
     private int maxCellsx = 500; private int maxCellsy = 500;
+    private int scrollMultiplier = 5;
     
     private Sheet sheet;
+    
+    private JLabel cellLabel;
+    
+    private void updateCellLabel(int pointingx, int pointingy) {
+        if (sheet != null) {
+            cellLabel.setText("(" + sheet.selectedCellx + ", " + sheet.selectedCelly + ")");
+            
+            if (pointingx <= sheet.maxCellsx && pointingy <= sheet.maxCellsy) {
+                cellLabel.setText(cellLabel.getText() + " (" + pointingx + ", " + pointingy + ")");
+            }
+        }
+    }
+    
+    private void updateCellLabelMouseCoords(int mousex, int mousey) {
+        updateCellLabel((mousex / sheet.cellWidth) + sheet.scrollx, (mousey / sheet.cellHeight) + sheet.scrolly);
+    }
     
     public SheetFrame() {
         setTitle("Spreadsheet");
@@ -50,6 +67,11 @@ class SheetFrame extends JFrame {
         diskStatusLabel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         statusBar.add(diskStatusLabel);
         
+        statusBar.add(Box.createGlue());
+        
+        cellLabel = new JLabel();
+        statusBar.add(cellLabel);
+        
         // Center panel
         JPanel centerPanel = new JPanel();
         centerPanel.setLayout(new BorderLayout());
@@ -90,6 +112,7 @@ class SheetFrame extends JFrame {
             @Override
             public void selectCell(int x, int y) {
                 super.selectCell(x, y);
+                updateCellLabel(x, y);
                 inputField.setText(super.getCell(x, y));
             }
             @Override
@@ -102,6 +125,20 @@ class SheetFrame extends JFrame {
                 hscroll.span = rows;
             }
         };
+        
+        sheet.addMouseWheelListener(new MouseWheelListener() {
+            public void mouseWheelMoved(MouseWheelEvent e) {
+                vscroll.scroll(e.getWheelRotation() * scrollMultiplier);
+            }
+        });
+        
+        sheet.addMouseMotionListener(new MouseMotionListener() {
+            public void mouseMoved(MouseEvent e) {
+                updateCellLabelMouseCoords(e.getX(), e.getY());
+            }
+            public void mouseDragged(MouseEvent e) {}
+        });
+        
         centerPanel.add(sheet, BorderLayout.CENTER);
         
         setVisible(true);

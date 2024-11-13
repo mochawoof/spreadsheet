@@ -18,6 +18,20 @@ class ScrollBar extends JPanel {
     // To be overriden
     public void onScroll() {}
     
+    public void scroll(int by) {
+        position = position + by;
+        
+        // Clamp position
+        if (position < 0) {
+            position = 0;
+        } else if (position > max) {
+            position = max;
+        }
+        
+        onScroll();
+        repaint();
+    }
+    
     public ScrollBar(int max, int span, int position, boolean isVertical) {
         thisScrollBar = this;
         this.max = max; this.span = span; this.position = position; this.isVertical = isVertical;
@@ -39,21 +53,14 @@ class ScrollBar extends JPanel {
                             Point scrollBarPosition = getLocationOnScreen();
                             Point mousePosition = MouseInfo.getPointerInfo().getLocation();
                             
+                            int by = 0;
                             if (!isVertical) {
-                                thisScrollBar.position = (int) ((((double) mousePosition.x - scrollBarPosition.x) / getWidth()) * max);
+                                by = (int) ((((double) mousePosition.x - scrollBarPosition.x) / getWidth()) * max) - thisScrollBar.position;
                             } else {
-                                thisScrollBar.position = (int) ((((double) mousePosition.y - scrollBarPosition.y) / getHeight()) * max);
+                                by = (int) ((((double) mousePosition.y - scrollBarPosition.y) / getHeight()) * max) - thisScrollBar.position;
                             }
                             
-                            // Clamp position
-                            if (thisScrollBar.position < 0) {
-                                thisScrollBar.position = 0;
-                            } else if (thisScrollBar.position > max - span) {
-                                thisScrollBar.position = max - span;
-                            }
-                            
-                            thisScrollBar.repaint();
-                            onScroll();
+                            scroll(by);
                         }
                         return 1;
                     }
