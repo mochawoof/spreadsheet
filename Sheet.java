@@ -20,17 +20,24 @@ class Sheet extends JPanel {
     // public so SheetFrame can scroll it
     public int scrollx; public int scrolly;
     
+    private int maxCellsx; private int maxCellsy;
+    
     public final int bufferLimit = 8000; // in bytes
     
-    public Sheet(String filename) {
+    public Sheet(String filename, int maxCellsx, int maxCellsy) {
         this.filename = filename;
+        this.maxCellsx = maxCellsx; this.maxCellsy = maxCellsy;
         selectCell(0, 0);
         scrollx = 0; scrolly = 0;
         //setBackground(Color.WHITE);
     }
     
     public String getCell(int x, int y) {
-        return x + ", " + y;
+        if (x <= maxCellsx && y <= maxCellsy) {
+            return x + ", " + y;
+        } else {
+            return null;
+        }
     }
     
     // is overriden in SheetFrame to support input field
@@ -53,7 +60,7 @@ class Sheet extends JPanel {
                 int realy = y * cellHeight;
                 
                 // draw cell background, if selected
-                if (x == selectedCellx && y == selectedCelly) {
+                if (x + scrollx == selectedCellx && y + scrolly == selectedCelly) {
                     g.setColor(new Color(130, 130, 255));
                     g.fillRect(realx, realy, cellWidth, cellHeight);
                 }
@@ -68,7 +75,7 @@ class Sheet extends JPanel {
                 g.setColor(Color.BLACK);
                 g.setFont(new Font("Sans-Serif", Font.PLAIN, 12));
                 
-                String cellContent = getCell(x + 0, y + 0);
+                String cellContent = getCell(x + scrollx, y + scrolly);
                 if (cellContent != null) {
                     g.drawString(cellContent, realx + 1, realy + cellHeight - 1);
                 }

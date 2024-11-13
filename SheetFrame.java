@@ -6,6 +6,8 @@ import java.awt.event.*;
 class SheetFrame extends JFrame {
     private int maxCellsx = 500; private int maxCellsy = 500;
     
+    private Sheet sheet;
+    
     public SheetFrame() {
         setTitle("Spreadsheet");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -56,13 +58,25 @@ class SheetFrame extends JFrame {
         JTextField inputField = new JTextField();
         centerPanel.add(inputField, BorderLayout.PAGE_START);
         
-        ScrollBar vscroll = new ScrollBar(maxCellsy, 0, 0, true);
+        ScrollBar vscroll = new ScrollBar(maxCellsy, 0, 0, true) {
+            @Override
+            public void onScroll() {
+                sheet.scrolly = this.position;
+                sheet.repaint();
+            }
+        };;
         centerPanel.add(vscroll, BorderLayout.LINE_END);
-        ScrollBar hscroll = new ScrollBar(maxCellsx, 0, 0, false);
+        ScrollBar hscroll = new ScrollBar(maxCellsx, 0, 0, false) {
+            @Override
+            public void onScroll() {
+                sheet.scrollx = this.position;
+                sheet.repaint();
+            }
+        };
         centerPanel.add(hscroll, BorderLayout.PAGE_END);
         
         // Add sheet
-        centerPanel.add(new Sheet("hi.csv") {
+        sheet = new Sheet("hi.csv", maxCellsx, maxCellsy) {
             @Override
             public void onDiskRead() {
                 diskStatusLabel.setIcon(greenIcon);
@@ -87,7 +101,8 @@ class SheetFrame extends JFrame {
                 vscroll.span = cols;
                 hscroll.span = rows;
             }
-        }, BorderLayout.CENTER);
+        };
+        centerPanel.add(sheet, BorderLayout.CENTER);
         
         setVisible(true);
     }

@@ -15,6 +15,9 @@ class ScrollBar extends JPanel {
     
     private boolean isMouseDown;
     
+    // To be overriden
+    public void onScroll() {}
+    
     public ScrollBar(int max, int span, int position, boolean isVertical) {
         thisScrollBar = this;
         this.max = max; this.span = span; this.position = position; this.isVertical = isVertical;
@@ -37,19 +40,20 @@ class ScrollBar extends JPanel {
                             Point mousePosition = MouseInfo.getPointerInfo().getLocation();
                             
                             if (!isVertical) {
-                                thisScrollBar.position = (int) ((((double) mousePosition.x - scrollBarPosition.x) / getWorkableWidth()) * max);
+                                thisScrollBar.position = (int) ((((double) mousePosition.x - scrollBarPosition.x) / getWidth()) * max);
                             } else {
-                                thisScrollBar.position = (int) ((((double) mousePosition.y - scrollBarPosition.y) / getWorkableHeight()) * max);
+                                thisScrollBar.position = (int) ((((double) mousePosition.y - scrollBarPosition.y) / getHeight()) * max);
                             }
                             
                             // Clamp position
                             if (thisScrollBar.position < 0) {
                                 thisScrollBar.position = 0;
-                            } else if (thisScrollBar.position > max) {
-                                thisScrollBar.position = max;
+                            } else if (thisScrollBar.position > max - span) {
+                                thisScrollBar.position = max - span;
                             }
                             
                             thisScrollBar.repaint();
+                            onScroll();
                         }
                         return 1;
                     }
@@ -72,27 +76,19 @@ class ScrollBar extends JPanel {
         });
     }
     
-    // getWidth substitute that returns the max width possible before the scroll bar becomes invisible
-    public int getWorkableWidth() {
-        return getWidth() - span;
-    }
-    public int getWorkableHeight() {
-        return getHeight() - span;
-    }
-    
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         
         g.setColor(Color.GRAY);
         if (!isVertical) {
-            int barWidth = (int) (((double) getWorkableWidth() / max) * span);
-            int barPosition = (int) (((double) getWorkableWidth() / max) * position);
-            g.fillRect(barPosition, 0, barWidth, getWorkableHeight());
+            int barWidth = (int) (((double) getWidth() / max) * span);
+            int barPosition = (int) (((double) getWidth() / max) * position);
+            g.fillRect(barPosition, 0, barWidth, getHeight());
         } else {
-            int barHeight = (int) (((double) getWorkableHeight() / max) * span);
-            int barPosition = (int) (((double) getWorkableHeight() / max) * position);
-            g.fillRect(0, barPosition, getWorkableWidth(), barHeight);
+            int barHeight = (int) (((double) getHeight() / max) * span);
+            int barPosition = (int) (((double) getHeight() / max) * position);
+            g.fillRect(0, barPosition, getWidth(), barHeight);
         }
     }
 }
